@@ -15,5 +15,4 @@
         android:id="@+id/products"
         android:icon="@drawable/ic_menu_products"
         android:title="@string/title_products" />
-
 </menu>

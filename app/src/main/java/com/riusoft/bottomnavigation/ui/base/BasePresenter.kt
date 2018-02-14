@@ -1,8 +1,13 @@
 package com.riusoft.bottomnavigation.ui.base
 
-import com.riusoft.bottomnavigation.data.AppDataManager
+interface BasePresenter<T> {
+    var viewRef: T?
 
-abstract class BasePresenter<in T> constructor(val dataManager: AppDataManager) {
-    abstract fun takeView(view: T)
-    abstract fun dropView()
+    fun takeView(view: T) {
+        viewRef = view
+    }
+
+    fun dropView() {
+        viewRef = null
+    }
 }

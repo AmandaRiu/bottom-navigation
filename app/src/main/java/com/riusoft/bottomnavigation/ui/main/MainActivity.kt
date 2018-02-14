@@ -70,7 +70,7 @@ class MainActivity : AppCompatActivity(),
     }
 
     private fun setupBottomNavigation() {
-//        bottom_navigation.disableShiftMode() // Extension function
+        bottom_navigation.disableShiftMode() // Extension function
         bottom_navigation.active(navPosition.position)   // Extension function
         bottom_navigation.setOnNavigationItemSelectedListener(this)
     }
@@ -182,14 +182,13 @@ class MainActivity : AppCompatActivity(),
         }
     }
 
-
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return when (item!!.itemId) {
             android.R.id.home -> {
                 onBackPressed()
                 true
             }
-            else -> false
+            else -> super.onOptionsItemSelected(item)
         }
     }
 }
