@@ -22,38 +22,34 @@ class OrderListFragment : Fragment(), OrderListContract.View {
     }
 
     @Inject lateinit var presenter: OrderListContract.Presenter
-
     @Inject lateinit var ordersAdapter: OrderListAdapter
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        Log.d("AMANDA-TEST", "OrderListFragment created")
-    }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         activity.title = getString(R.string.title_orders)
         return inflater!!.inflate(R.layout.fragment_orderlist, container, false)
     }
 
-    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        listView.adapter = ordersAdapter
-    }
-
     override fun onAttach(context: Context?) {
         AndroidSupportInjection.inject(this)
         super.onAttach(context)
-        presenter.takeView(this)
         if (context is FragmentListener) {
             presenter.setFragmentListener(context)
         }
     }
 
+    override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        listView.adapter = ordersAdapter
+        presenter.takeView(this)
+    }
+
+    override fun onDestroyView() {
+        presenter.dropView()
+        super.onDestroyView()
+    }
+
     override fun onDetach() {
         super.onDetach()
-        presenter.dropView()
         presenter.setFragmentListener(null)
     }
 

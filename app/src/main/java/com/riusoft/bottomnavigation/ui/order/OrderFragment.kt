@@ -34,16 +34,15 @@ class OrderFragment : Fragment(), OrderContract.View {
 
     @Inject lateinit var presenter: OrderContract.Presenter
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        Log.d("AMANDA-TEST", "OrderFragment created")
+    override fun onAttach(context: Context?) {
+        AndroidSupportInjection.inject(this)
+        super.onAttach(context)
     }
 
     override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         activity.title = getString(R.string.order_detail)
-        return inflater!!.inflate(R.layout.fragment_order, container, false)
+        return inflater?.inflate(R.layout.fragment_order, container, false)
     }
 
     override fun onViewCreated(view: View?, savedInstanceState: Bundle?) {
@@ -54,16 +53,11 @@ class OrderFragment : Fragment(), OrderContract.View {
             txt_name.text = args.getString(FIELD_NAME, "")
             txt_orderTotal.text = args.getFloat(FIELD_TOTAL, 0F).toString()
         }
-    }
-
-    override fun onAttach(context: Context?) {
-        AndroidSupportInjection.inject(this)
-        super.onAttach(context)
         presenter.takeView(this)
     }
 
-    override fun onDetach() {
-        super.onDetach()
+    override fun onDestroyView() {
         presenter.dropView()
+        super.onDestroyView()
     }
 }
