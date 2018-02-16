@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentTransaction
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.MenuItem
 import com.riusoft.bottomnavigation.R
 import com.riusoft.bottomnavigation.extensions.*
@@ -34,6 +35,9 @@ class MainActivity : AppCompatActivity(),
     override fun onCreate(savedInstanceState: Bundle?) {
         AndroidInjection.inject(this)
         super.onCreate(savedInstanceState)
+
+        Log.d("AMANDA-TEST", "mainActivity: onCreate")
+
         restoreSaveInstanceState(savedInstanceState)
         setContentView(R.layout.activity_main)
 
@@ -47,6 +51,7 @@ class MainActivity : AppCompatActivity(),
 
     override fun onDestroy() {
         presenter.dropView()
+        Log.d("AMANDA-TEST", "mainActivity: onDestroy")
         super.onDestroy()
     }
 
@@ -91,6 +96,8 @@ class MainActivity : AppCompatActivity(),
      * Immediately execute transactions with FragmentManager#executePendingTransactions.
      */
     private fun switchFragment(navPosition: BottomNavigationPosition): Boolean {
+
+        Log.d("AMANDA-TEST", "mainActivity: switchFragment")
 
         // Remove any child fragments
         returnToMainFragment()
@@ -165,7 +172,7 @@ class MainActivity : AppCompatActivity(),
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportFragmentManager.beginTransaction()
-                .add(R.id.container, fragment, tag)
+                .replace(R.id.container, fragment, tag)
                 .addToBackStack(null)
                 .commit()
     }

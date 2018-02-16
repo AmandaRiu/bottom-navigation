@@ -1,5 +1,6 @@
 package com.riusoft.bottomnavigation.ui.orderlist
 
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,10 @@ import com.riusoft.bottomnavigation.data.model.db.OrderModel
 class OrderListAdapter constructor(private val orders: MutableList<OrderModel>,
                                    val presenter: OrderListContract.Presenter)
     : BaseAdapter() {
+
+    init {
+        Log.d("AMANDA-TEST", "orderListAdapter: created")
+    }
 
     fun setOrders(items: List<OrderModel>) {
         orders.clear()
