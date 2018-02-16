@@ -4,13 +4,11 @@ import android.os.Bundle
 import android.support.design.widget.BottomNavigationView
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentTransaction
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.MenuItem
 import com.riusoft.bottomnavigation.R
 import com.riusoft.bottomnavigation.extensions.*
-import com.riusoft.bottomnavigation.ui.base.FragmentListener
 import dagger.android.AndroidInjection
 import dagger.android.AndroidInjector
 import dagger.android.DispatchingAndroidInjector
@@ -21,13 +19,13 @@ import javax.inject.Inject
 class MainActivity : AppCompatActivity(),
         MainContract.View,
         HasSupportFragmentInjector,
-        BottomNavigationView.OnNavigationItemSelectedListener, FragmentListener {
+        BottomNavigationView.OnNavigationItemSelectedListener {
 
     companion object {
         private const val KEY_POSITION = "keyPosition"
     }
 
-    private var navPosition: BottomNavigationPosition = BottomNavigationPosition.DASHBOARD
+    private var activeNavPosition: BottomNavigationPosition = BottomNavigationPosition.DASHBOARD
 
     @Inject lateinit var fragmentInjector: DispatchingAndroidInjector<Fragment>
     @Inject lateinit var presenter: MainContract.Presenter
@@ -57,26 +55,26 @@ class MainActivity : AppCompatActivity(),
 
     override fun onSaveInstanceState(outState: Bundle?) {
         // Store the current navigation position.
-        outState?.putInt(KEY_POSITION, navPosition.id)
+        outState?.putInt(KEY_POSITION, activeNavPosition.id)
         super.onSaveInstanceState(outState)
     }
 
     override fun onNavigationItemSelected(item: MenuItem): Boolean {
-        navPosition = findNavigationPositionById(item.itemId)
-        return switchFragment(navPosition)
+        val pos = findNavigationPositionById(item.itemId)
+        return switchFragment(pos)
     }
 
     private fun restoreSaveInstanceState(savedInstanceState: Bundle?) {
         // Restore the current navigation position.
         savedInstanceState?.also {
             val id = it.getInt(KEY_POSITION, BottomNavigationPosition.DASHBOARD.id)
-            navPosition = findNavigationPositionById(id)
+            activeNavPosition = findNavigationPositionById(id)
         }
     }
 
     private fun setupBottomNavigation() {
         bottom_navigation.disableShiftMode() // Extension function
-        bottom_navigation.active(navPosition.position)   // Extension function
+        bottom_navigation.active(activeNavPosition.position)   // Extension function
         bottom_navigation.setOnNavigationItemSelectedListener(this)
     }
 
@@ -95,23 +93,23 @@ class MainActivity : AppCompatActivity(),
      *
      * Immediately execute transactions with FragmentManager#executePendingTransactions.
      */
-    private fun switchFragment(navPosition: BottomNavigationPosition): Boolean {
+    private fun switchFragment(pos: BottomNavigationPosition): Boolean {
 
         Log.d("AMANDA-TEST", "mainActivity: switchFragment")
+        val activeFragment = supportFragmentManager.findFragmentByTag(activeNavPosition.getTag())
 
         // Remove any child fragments
-        returnToMainFragment()
+        clearFragmentBackStack(activeFragment)
 
         // Grab the requested top-level fragment and load if not already
         // in the current view.
-        val fragment = supportFragmentManager.findFragment(navPosition)
-        if (!fragment.isAdded) {
-
+        val fragment = supportFragmentManager.findFragment(pos)
+        if (fragment.isHidden || !fragment.isAdded) {
             // Remove the active fragment and replace with this newly selected one
-            detachParentFragment()
-            attachParentFragment(fragment, navPosition.getTag())
+            hideParentFragment(activeFragment)
+            showParentFragment(fragment, pos.getTag())
             supportFragmentManager.executePendingTransactions()
-
+            activeNavPosition = pos
             return true
         }
         return false
@@ -128,22 +126,21 @@ class MainActivity : AppCompatActivity(),
     /**
      * Pop all child fragments to return to the top-level view.
      */
-    private fun returnToMainFragment() {
-        while (supportFragmentManager.backStackEntryCount > 0) {
-            supportFragmentManager.popBackStackImmediate()
+    private fun clearFragmentBackStack(fragment: Fragment?) {
+        fragment?.let {
+            while (fragment.childFragmentManager.backStackEntryCount > 0) {
+                fragment.childFragmentManager.popBackStackImmediate()
+            }
         }
-        // Reset toolbar status
-        supportActionBar?.setDisplayShowHomeEnabled(false)
-        supportActionBar?.setDisplayHomeAsUpEnabled(false)
     }
 
     /**
      * Remove the current fragment from the fragment container. This
      * should only be used with top-level fragments.
      */
-    private fun detachParentFragment() {
-        supportFragmentManager.findFragmentById(R.id.container)?.also {
-            supportFragmentManager.beginTransaction().detach(it).commit()
+    private fun hideParentFragment(fragment: Fragment?) {
+        fragment?.let {
+            supportFragmentManager.beginTransaction().hide(fragment).commit()
         }
     }
 
@@ -151,42 +148,17 @@ class MainActivity : AppCompatActivity(),
      * Attach the provided fragment to the fragment container. This should
      * only be used with top-level fragments.
      */
-    private fun attachParentFragment(fragment: Fragment, tag: String) {
-        supportFragmentManager.popBackStack()
-        if (fragment.isDetached) {
-            supportFragmentManager.beginTransaction().attach(fragment).commit()
+    private fun showParentFragment(fragment: Fragment, tag: String) {
+        if (fragment.isHidden) {
+            supportFragmentManager.beginTransaction().show(fragment).commit()
         } else {
             supportFragmentManager.beginTransaction().add(R.id.container, fragment, tag).commit()
         }
-        // Set a transition animation for this transaction.
-        supportFragmentManager.beginTransaction()
-                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                .commit()
-    }
-
-    /**
-     * Display the requested fragment in the fragment view and add to the backstack.
-     * Only use with child fragments to drill down from the top-level fragment.
-     */
-    override fun loadChildFragment(fragment: Fragment, tag: String) {
-        supportActionBar?.setDisplayShowHomeEnabled(true)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportFragmentManager.beginTransaction()
-                .replace(R.id.container, fragment, tag)
-                .addToBackStack(null)
-                .commit()
     }
 
     override fun onBackPressed() {
-        val count = supportFragmentManager.backStackEntryCount
-
-        if (count > 0) {
-            supportFragmentManager.popBackStack()
-            if (count == 1) {
-                supportActionBar?.setDisplayShowHomeEnabled(false)
-                supportActionBar?.setDisplayHomeAsUpEnabled(false)
-            }
-        }
+        val fragment = supportFragmentManager.findFragmentByTag(activeNavPosition.getTag())
+        fragment.childFragmentManager.popBackStack()
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
