@@ -19,7 +19,6 @@ class DashboardFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        retainInstance = true
         Log.d("AMANDA-TEST", "dashboard: onCreate")
     }
 

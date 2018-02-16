@@ -26,7 +26,6 @@ class OrderListFragment : Fragment(), OrderListContract.View {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        retainInstance = true
         Log.d("AMANDA-TEST", "orders: onCreate")
     }
 

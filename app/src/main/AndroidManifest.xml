@@ -11,7 +11,8 @@
         android:name="com.riusoft.bottomnavigation.BottomNavigationApp"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.riusoft.bottomnavigation.ui.main.MainActivity">
+            android:name="com.riusoft.bottomnavigation.ui.main.MainActivity"
+            android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

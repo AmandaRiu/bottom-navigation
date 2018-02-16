@@ -19,7 +19,6 @@ class ProductsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        retainInstance = true
         Log.d("AMANDA-TEST", "products: onCreate")
     }
 
